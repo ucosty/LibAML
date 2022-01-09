@@ -118,13 +118,7 @@ Result<Element *> Parser::parse_name() {
     auto self = new Name(opcode_length(Opcode::DefName) + data_ref->get_size() + name_string->get_size());
     self->add_metadata(Metadata::StringConst, name_string);
     self->add_metadata(Metadata::ObjectRef, data_ref);
-
-//    fmt::print("Name: name = {}, string_size = {}, data_size = {}, total_size = {}\n", name_string->value_string(),
-//               name_string->get_size(), data_ref->get_size(),
-//               opcode_length(Opcode::DefName) + data_ref->get_size() + name_string->get_size());
-
     return self;
-
 }
 
 Result<NameString *> Parser::parse_name_string() {
@@ -435,15 +429,16 @@ Result<Element *> Parser::parse_string() {
     return new Data(value);
 }
 
-Result<Element *> Parser::parse_arg_obj() {
-    return nullptr;
+Result<Opcode> Parser::parse_arg_obj() {
+    return ensure_opcode(is_arg_obj);
 }
 
-Result<Element *> Parser::parse_local_object() {
-    return nullptr;
+Result<Opcode> Parser::parse_local_object() {
+    return ensure_opcode(is_local_object);
 }
 
 Result<Element *> Parser::parse_expression_opcode() {
+    auto opcode = TRY(ensure_opcode(is_expression_opcode));
     return nullptr;
 }
 

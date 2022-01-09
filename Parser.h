@@ -113,9 +113,9 @@ public:
 
     Result<Element *> parse_string();
 
-    Result<Element *> parse_arg_obj();
+    Result<Opcode> parse_arg_obj();
 
-    Result<Element *> parse_local_object();
+    Result<Opcode> parse_local_object();
 
     Result<Element *> parse_expression_opcode();
 
