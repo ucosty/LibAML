@@ -1,0 +1,5 @@
+[
+  "DefAlias := AliasOp:ensure NameString:metadata NameString:metadata",
+  "DefName := NameOp:ensure NameString:metadata DataRefObject:metadata",
+  "DefScope := ScopeOp:ensure PkgLength NameString TermList"
+]
