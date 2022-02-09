@@ -7,7 +7,9 @@
 #include "Element.h"
 
 class Return : public Element {
-    ELEMENT_OBJ(ElementType::Name)
+ELEMENT_OBJ(ElementType::TermArg)
 public:
-    Return(size_t size) : m_size(size), m_payload_size(0) {}
+    Return(size_t size, size_t payload_size) : m_size(size), m_payload_size(payload_size) {}
+
+    [[nodiscard]] std::string value_string() override;
 };

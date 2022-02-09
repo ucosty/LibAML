@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 #include <fmt/format-inl.h>
-#include "Parser.h"
+#include "Parsers/Parser.h"
 
 int main() {
     Parser parser;

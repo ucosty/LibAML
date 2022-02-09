@@ -1,0 +1,19 @@
+// LibAML
+// Copyright (c) 2022 Matthew Costa <ucosty@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only
+#include "Parser.h"
+
+Result<Element *> Parser::parse_timer() {
+    // DefTimer := TimerOp
+    TRY(ensure_opcode(Opcode::DefTimer));
+    
+
+
+    auto full_size = opcode_length(Opcode::DefTimer);
+    auto payload_size = 0;
+
+    auto self = new Timer(full_size, payload_size);
+
+    return self;
+}

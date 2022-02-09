@@ -6,16 +6,6 @@ def lnot_opcode(opcode: int):
     return opcode | (0x92 << 8)
 
 
-metadata_map = {
-    "name_string": "Name",
-    "data_ref_object": "ObjectRef"
-}
-
-
-def get_metadata_name(term_name):
-    return metadata_map[term_name]
-
-
 class_map = {
     "DefAlias": "Alias",
     "DefName": "Name",
@@ -72,7 +62,22 @@ class_map = {
     "DefToInteger": "ToInteger",
     "DefToString": "ToString",
     "DefWait": "Wait",
-    "DefXOr": "Xor"
+    "DefXOr": "Xor",
+    "DefBreak": "Break",
+    "DefBreakPoint": "BreakPoint",
+    "DefContinue": "Continue",
+    "DefElse": "Else",
+    "DefFatal": "Fatal",
+    "DefIfElse": "IfElse",
+    "DefNoop": "Noop",
+    "DefNotify": "Notify",
+    "DefRelease": "Release",
+    "DefReset": "Reset",
+    "DefReturn": "Return",
+    "DefSignal": "Signal",
+    "DefSleep": "Sleep",
+    "DefStall": "Stall",
+    "DefWhile": "While",
 }
 
 
@@ -81,6 +86,7 @@ def get_class_name(term_name):
 
 
 opcode_map = {
+    "termarg": "TermArg",
     "aliasop": "DefAlias",
     "nameop": "DefName",
     "scopeop": "DefScope",
@@ -192,8 +198,14 @@ opcode_map = {
     "arg4op": "Arg4Op",
     "arg5op": "Arg5Op",
     "arg6op": "Arg6Op",
+    "elseop": "DefElse",
+    "ifop": "DefIf",
 }
 
 
 def get_opcode(name: str):
-    return opcode_map[name.lower()]
+    name_lower = name.lower()
+    if name_lower in opcode_map:
+        return opcode_map[name_lower]
+    else:
+        raise KeyError("Could not find opcode: {}".format(name_lower))

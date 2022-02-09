@@ -232,7 +232,7 @@ Result<Element *> Parser::parse_scope() {
     // DefScope := ScopeOp PkgLength NameString TermList
     TRY(ensure_opcode(Opcode::DefScope));
     size_t package_length_size = 0;
-    auto package_length = TRY(get_package_length(&package_length_size));
+    auto package_length = TRY(parse_pkg_length(&package_length_size));
     auto name = TRY(parse_name_string());
     auto full_size = package_length + opcode_length(Opcode::DefScope);
     auto payload_size = package_length - package_length_size - name->get_size();
@@ -243,80 +243,6 @@ Result<Element *> Parser::parse_scope() {
         TRY(parse_term_list(self));
     }
     return self;
-}
-
-Result<Element *> Parser::parse_device() {
-    TRY(ensure_opcode(Opcode::DefDevice));
-    size_t package_length_size = 0;
-    auto package_length = TRY(get_package_length(&package_length_size));
-    auto name = TRY(parse_name_string());
-
-    auto full_size = package_length + opcode_length(Opcode::DefDevice);
-    auto payload_size = package_length - package_length_size - name->get_size();
-
-//    fmt::print("Device: package_length = {}, name = {}, full_size = {}, payload_size = {}\n", package_length, name->value_string(), full_size, payload_size);
-
-    auto self = new Device(full_size, payload_size);
-    self->add_metadata(Metadata::Name, name);
-//    TRY(parse_term_list(self));
-    return self;
-}
-
-Result<Element *> Parser::parse_method() {
-    // DefMethod := MethodOp PkgLength NameString MethodFlags TermList
-    TRY(ensure_opcode(Opcode::DefMethod));
-    size_t package_length_size = 0;
-    auto package_length = TRY(get_package_length(&package_length_size));
-    auto name = TRY(parse_name_string());
-    auto flags = TRY(m_byte_reader.read_byte());
-    auto full_size = package_length + opcode_length(Opcode::DefMethod);
-    auto payload_size = package_length - package_length_size - name->get_size() - sizeof(flags);
-
-    fmt::print("Method: package_length = {}, name = {}, full_size = {}, payload_size = {}\n", package_length,
-               name->value_string(), full_size, payload_size);
-
-    auto self = new Method(full_size, payload_size);
-    self->add_metadata(Metadata::Name, name);
-    if (payload_size > 0) {
-        TRY(parse_term_list(self));
-    }
-    return self;
-}
-
-Result<Element *> Parser::parse_return() {
-    // DefReturn := ReturnOp ArgObject
-    TRY(ensure_opcode(Opcode::DefReturn));
-    auto arg_object = TRY(parse_arg_object());
-    auto size = opcode_length(Opcode::DefReturn) + arg_object->get_size();
-    fmt::print("Return: package_length = {}\n", size);
-    auto self = new Return(size);
-    self->add_child(arg_object);
-    return self;
-}
-
-Result<Element *> Parser::parse_arg_object() {
-    // ArgObject := TermArg => DataRefObject
-    // Term => Evaluated Type
-    // Shows the resulting type of the evaluation of Term.
-    return parse_term_arg();
-}
-
-Result<Element *> Parser::parse_term_arg() {
-    // TermArg := ExpressionOpcode | DataObject | ArgObj | LocalObj
-    auto next_opcode = TRY(peek_next_opcode());
-    if(is_arg_obj(next_opcode)) {
-        return parse_arg_obj();
-    }
-    if(is_local_object(next_opcode)) {
-        return parse_local_object();
-    }
-    if(is_data_object(next_opcode)) {
-        return parse_data_object();
-    }
-    if(is_expression_opcode(next_opcode)) {
-        return parse_expression_opcode();
-    }
-    return Lib::Error::from_code(1);
 }
 
 Result<Element *> Parser::parse_computational_data() {
@@ -367,16 +293,12 @@ Result<Element *> Parser::parse_def_package() {
     TRY(ensure_opcode(Opcode::DefPackage));
 
     size_t package_length_size = 0;
-    auto package_length = TRY(get_package_length(&package_length_size));
+    auto package_length = TRY(parse_pkg_length(&package_length_size));
     auto num_elements = TRY(m_byte_reader.read_byte());
 
     for(int i = 0; i < num_elements; i++) {
         TRY(parse_package_element());
     }
-    return nullptr;
-}
-
-Result<Element *> Parser::parse_package_element() {
     return nullptr;
 }
 
@@ -429,12 +351,14 @@ Result<Element *> Parser::parse_string() {
     return new Data(value);
 }
 
-Result<Opcode> Parser::parse_arg_obj() {
-    return ensure_opcode(is_arg_obj);
+Result<Element *> Parser::parse_arg_obj() {
+    TRY(ensure_opcode(is_arg_obj));
+    return new Element{opcode_length(Opcode::Arg0Op), 0};
 }
 
-Result<Opcode> Parser::parse_local_object() {
-    return ensure_opcode(is_local_object);
+Result<Element *> Parser::parse_local_object() {
+    TRY(ensure_opcode(is_local_object));
+    return new Element{opcode_length(Opcode::Local0Op), 0};
 }
 
 Result<Element *> Parser::parse_expression_opcode() {
@@ -442,7 +366,46 @@ Result<Element *> Parser::parse_expression_opcode() {
     return nullptr;
 }
 
-Result<size_t> Parser::get_package_length(size_t *consumed) {
+Result<Element *> Parser::parse_operand() {
+    // Operand := TermArg => Integer
+    return parse_term_arg();
+}
+
+Result<Element *> Parser::parse_target() {
+    return nullptr;
+}
+
+Result<Element *> Parser::parse_pkg_length() {
+    // <bit 7-6: bytedata count that follows (0-3)>
+    // <bit 5-4: only used if pkglength < 63>
+    // <bit 3-0: least significant package length nybble>
+    auto lead_byte = TRY(m_byte_reader.read_byte());
+    auto byte_count = (lead_byte >> 6) & 0x03u;
+    auto consumed = byte_count + 1;
+    switch (byte_count) {
+        case 0:
+            return new PkgLength{consumed, lead_byte};
+        case 1: {
+            auto byte_data_1 = TRY(m_byte_reader.read_byte());
+            return new PkgLength{consumed, (size_t)(lead_byte & 0xf) | (size_t)(byte_data_1 << 4)};
+        }
+        case 2: {
+            auto byte_data_1 = TRY(m_byte_reader.read_byte());
+            auto byte_data_2 = TRY(m_byte_reader.read_byte());
+            return new PkgLength{consumed, (size_t)(lead_byte & 0xf) | (size_t)(byte_data_1 << 4) | (size_t)(byte_data_2 << 12)};
+        }
+        case 3: {
+            auto byte_data_1 = TRY(m_byte_reader.read_byte());
+            auto byte_data_2 = TRY(m_byte_reader.read_byte());
+            auto byte_data_3 = TRY(m_byte_reader.read_byte());
+            return new PkgLength{consumed, (size_t)(lead_byte & 0xf) | (size_t)(byte_data_1 << 4) | (size_t)(byte_data_2 << 12) | (size_t)(byte_data_3 << 20)};
+        }
+        default:
+            return Lib::Error::from_code(1);
+    }
+}
+
+Result<size_t> Parser::parse_pkg_length(size_t *consumed) {
     // <bit 7-6: bytedata count that follows (0-3)>
     // <bit 5-4: only used if pkglength < 63>
     // <bit 3-0: least significant package length nybble>

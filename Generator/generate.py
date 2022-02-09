@@ -70,7 +70,7 @@ std::string {0}::value_string() {{
     return "[{0}]";
 }}
 """
-    filename = "{}/Elemenets/{}.cpp".format(output_path, name)
+    filename = "{}/Elements/{}.cpp".format(output_path, name)
     with open(filename, 'w') as file:
         file.write(template.format(name))
 
@@ -92,7 +92,7 @@ public:
     [[nodiscard]] std::string value_string() override;
 }};
 """
-    filename = "{}/Elemenets/{}.h".format(output_path, name)
+    filename = "{}/Elements/{}.h".format(output_path, name)
     with open(filename, 'w') as file:
         file.write(template.format(name))
 
@@ -100,6 +100,27 @@ public:
 def generate_comment(opcode_name, terms_raw):
     term_names = [opcode_name for (term_type, opcode_name) in terms_raw]
     return "// {} := {}".format(opcode_name, ' '.join(term_names))
+
+
+def generate_sub_parser_size_calc(index, term, list):
+    _, term_name = term
+    instance_name = get_instance_name(term_name)
+    if term_name == 'PkgLength':
+        list += " + package_length_size"
+    else:
+        list += " + {}_{}->get_size()".format(instance_name, index)
+    return list
+
+
+def generate_sub_parser_call(index, term, sub_parser_list):
+    _, term_name = term
+    parser = get_parser_name(term_name)
+    instance_name = get_instance_name(term_name)
+    if term_name == 'PkgLength':
+        sub_parser_list.append("    size_t package_length_size = 0;")
+        sub_parser_list.append("    auto package_length = TRY(parse_pkg_length(&package_length_size));")
+    else:
+        sub_parser_list.append("    auto {}_{} = TRY({}());".format(instance_name, index, parser))
 
 
 def generate_parser_source(filename, method_name, opcode_name, class_name, terms):
@@ -112,21 +133,61 @@ def generate_parser_source(filename, method_name, opcode_name, class_name, terms
 Result<Element *> Parser::parse_{method_name}() {{
     {comment}
     TRY(ensure_opcode(Opcode::{opcode_name}));
+    
+{sub_parsers}
+{object_size}
     auto self = new {class_name}(full_size, payload_size);
+{metadata}
     return self;
 }}
 """
+    # print("Result<Element *> parse_{method_name}();".format(method_name=method_name))
+
+    element_sizes = ""
+    sub_parser_list = []
+
+    for index, term in enumerate(terms[1:]):
+        generate_sub_parser_call(index, term, sub_parser_list)
+        element_sizes = generate_sub_parser_size_calc(index, term, element_sizes)
+    sub_parsers = '\n'.join(sub_parser_list)
+
+    metadata = ""
+
+    object_size_template = """
+    auto full_size = opcode_length(Opcode::{opcode_name}){element_sizes};
+    auto payload_size = 0;
+"""
+    object_size = object_size_template.format(opcode_name=opcode_name
+                                              , element_sizes=element_sizes)
+
     comment = generate_comment(opcode_name, terms)
     with open(filename, 'w') as file:
-        file.write(template.format(method_name=method_name, opcode_name=opcode_name, class_name=class_name, comment=comment))
+        file.write(template.format(method_name=method_name
+                                   , opcode_name=opcode_name
+                                   , class_name=class_name
+                                   , comment=comment
+                                   , sub_parsers=sub_parsers
+                                   , metadata=metadata
+                                   , object_size=object_size))
 
 
-def generate_class(output_path, name):
-    generate_class_source(output_path, name)
-    generate_class_header(output_path, name)
+def generate_cmake_lists(output_path, files):
+    file_list = ' '.join(files)
+    template = "set(PARSERS_GENERATED {} PARENT_SCOPE)".format(file_list)
+    filename = "{}/Parsers/CMakeLists.txt".format(output_path)
+    with open(filename, 'w') as file:
+        file.write(template)
 
 
 def get_method_name(term_name: str):
+    return to_snake_case(term_name.removeprefix("Def"))
+
+
+def get_parser_name(term_name: str):
+    return "parse_" + to_snake_case(term_name.removeprefix("Def"))
+
+
+def get_instance_name(term_name: str):
     return to_snake_case(term_name.removeprefix("Def"))
 
 
@@ -139,12 +200,19 @@ def generate_method(output_path, name, terms):
     class_name = opcodes.get_class_name(name)
 
     generate_parser_source(filename, method_name, opcode_name, class_name, terms)
-    generate_class(output_path, opcodes.get_class_name(name))
+    generate_class_source(output_path, opcodes.get_class_name(name))
+    generate_class_header(output_path, opcodes.get_class_name(name))
 
 
 def generate(methods, output_path):
     for (name, terms) in methods:
         generate_method(output_path, name, terms)
+
+    parser_files = ["${{CMAKE_CURRENT_SOURCE_DIR}}/{}.cpp".format(name) for (name, _) in methods]
+    generate_cmake_lists(output_path, parser_files)
+
+    for (name, terms) in methods:
+        print("#include \"{}.h\"".format(opcodes.get_class_name(name)))
 
 
 def main():

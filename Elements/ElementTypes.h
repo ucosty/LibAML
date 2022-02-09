@@ -15,6 +15,7 @@ enum class ElementType {
     Data,
     Method,
     TermArg,
+    Acquire
 };
 
 static const char *type_name(ElementType type) {

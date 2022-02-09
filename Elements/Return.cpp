@@ -6,5 +6,9 @@
 
 void Return::print(int depth) {
     indent(depth * 2);
-    fmt::print("- Return: term_arg = {}\n", m_children[0]->value_string());
+    fmt::print("- Return\n");
+}
+
+std::string Return::value_string() {
+    return "[Return]";
 }

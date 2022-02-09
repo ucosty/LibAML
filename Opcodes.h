@@ -32,6 +32,7 @@ enum class Opcode {
     DefOpRegion = EXT_OPCODE(0x80),
     DefPowerRes = EXT_OPCODE(0x84),
     DefThermalZone = EXT_OPCODE(0x85),
+    DefLoad = EXT_OPCODE(0x20),
     DefAcquire = EXT_OPCODE(0x23),
     DefAdd = 0x72,
     DefAnd = 0x7b,
@@ -91,6 +92,7 @@ enum class Opcode {
     DefContinue = 0x9f,
     DefFatal = EXT_OPCODE(0x32),
     DefIfElse = 0xA0,
+    DefElse = 0xA1,
     DefNoop = 0xa3,
     DefNotify = 0x86,
     DefRelease = EXT_OPCODE(0x27),
@@ -127,6 +129,7 @@ enum class Opcode {
     Arg4Op = 0x6C,
     Arg5Op = 0x6D,
     Arg6Op = 0x6E,
+    DebugOp = EXT_OPCODE(0x31),
 };
 
 size_t opcode_length(Opcode opcode);

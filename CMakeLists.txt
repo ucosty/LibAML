@@ -6,33 +6,170 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(fmt)
 link_libraries(fmt-header-only)
 
+add_subdirectory(Parsers)
+
 set(ELEMENTS
+        Elements/Acquire.cpp
+        Elements/Acquire.h
+        Elements/Add.cpp
+        Elements/Add.h
+        Elements/And.cpp
+        Elements/And.h
+        Elements/Break.cpp
+        Elements/Break.h
+        Elements/BreakPoint.cpp
+        Elements/BreakPoint.h
+        Elements/Buffer.cpp
+        Elements/Buffer.h
+        Elements/Concat.cpp
+        Elements/Concat.h
+        Elements/ConcatRes.cpp
+        Elements/ConcatRes.h
+        Elements/CondRefOf.cpp
+        Elements/CondRefOf.h
+        Elements/Continue.cpp
+        Elements/Continue.h
+        Elements/CopyObject.cpp
+        Elements/CopyObject.h
         Elements/DataContainer.cpp
         Elements/DataContainer.h
         Elements/Data.cpp
         Elements/Data.h
+        Elements/Decrement.cpp
+        Elements/Decrement.h
         Elements/DefinitionBlock.cpp
         Elements/DefinitionBlock.h
+        Elements/DerefOf.cpp
+        Elements/DerefOf.h
         Elements/Device.cpp
         Elements/Device.h
+        Elements/Divide.cpp
+        Elements/Divide.h
         Elements/Element.cpp
         Elements/Element.h
         Elements/Elements.h
         Elements/ElementTypes.h
+        Elements/Else.cpp
+        Elements/Else.h
+        Elements/Fatal.cpp
+        Elements/Fatal.h
+        Elements/FindSetLeftBit.cpp
+        Elements/FindSetLeftBit.h
+        Elements/FindSetRightBit.cpp
+        Elements/FindSetRightBit.h
+        Elements/FromBCD.cpp
+        Elements/FromBCD.h
+        Elements/IfElse.cpp
+        Elements/IfElse.h
+        Elements/Increment.cpp
+        Elements/Increment.h
+        Elements/Index.cpp
+        Elements/Index.h
+        Elements/LAnd.cpp
+        Elements/LAnd.h
+        Elements/LEqual.cpp
+        Elements/LEqual.h
+        Elements/LGreater.cpp
+        Elements/LGreaterEqual.cpp
+        Elements/LGreaterEqual.h
+        Elements/LGreater.h
+        Elements/LLess.cpp
+        Elements/LLessEqual.cpp
+        Elements/LLessEqual.h
+        Elements/LLess.h
+        Elements/LNot.cpp
+        Elements/LNotEqual.cpp
+        Elements/LNotEqual.h
+        Elements/LNot.h
+        Elements/Load.cpp
+        Elements/Load.h
+        Elements/LoadTable.cpp
+        Elements/LoadTable.h
+        Elements/LOr.cpp
+        Elements/LOr.h
+        Elements/Match.cpp
+        Elements/Match.h
         Elements/Method.cpp
-        Elements/Method.h
+        Elements/DefMethod.h
+        Elements/Mid.cpp
+        Elements/Mid.h
+        Elements/Mod.cpp
+        Elements/Mod.h
+        Elements/Multiply.cpp
+        Elements/Multiply.h
         Elements/Name.cpp
         Elements/Name.h
         Elements/NameString.cpp
         Elements/NameString.h
+        Elements/NAnd.cpp
+        Elements/NAnd.h
+        Elements/Noop.cpp
+        Elements/Noop.h
+        Elements/NOr.cpp
+        Elements/NOr.h
+        Elements/Not.cpp
+        Elements/Not.h
+        Elements/Notify.cpp
+        Elements/Notify.h
+        Elements/ObjectType.cpp
+        Elements/ObjectType.h
+        Elements/Or.cpp
+        Elements/Or.h
+        Elements/Package.cpp
+        Elements/Package.h
+        Elements/PkgLength.cpp
+        Elements/PkgLength.h
+        Elements/RefOf.cpp
+        Elements/RefOf.h
+        Elements/Release.cpp
+        Elements/Release.h
+        Elements/Reset.cpp
+        Elements/Reset.h
         Elements/Return.cpp
         Elements/Return.h
         Elements/Scope.cpp
         Elements/Scope.h
+        Elements/ShiftLeft.cpp
+        Elements/ShiftLeft.h
+        Elements/ShiftRight.cpp
+        Elements/ShiftRight.h
+        Elements/Signal.cpp
+        Elements/Signal.h
+        Elements/SizeOf.cpp
+        Elements/SizeOf.h
+        Elements/Sleep.cpp
+        Elements/Sleep.h
+        Elements/Stall.cpp
+        Elements/Stall.h
+        Elements/Store.cpp
+        Elements/Store.h
+        Elements/Subtract.cpp
+        Elements/Subtract.h
         Elements/TermArg.cpp
         Elements/TermArg.h
+        Elements/Timer.cpp
+        Elements/Timer.h
+        Elements/ToBCD.cpp
+        Elements/ToBCD.h
+        Elements/ToBuffer.cpp
+        Elements/ToBuffer.h
+        Elements/ToDecimalString.cpp
+        Elements/ToDecimalString.h
+        Elements/ToHexString.cpp
+        Elements/ToHexString.h
+        Elements/ToInteger.cpp
+        Elements/ToInteger.h
+        Elements/ToString.cpp
+        Elements/ToString.h
+        Elements/VarPackage.cpp
+        Elements/VarPackage.h
+        Elements/Wait.cpp
+        Elements/Wait.h
+        Elements/While.cpp
+        Elements/While.h
+        Elements/Xor.cpp
+        Elements/Xor.h
         )
-
 
 set(LIBRARY
         Library/Error.h
@@ -43,13 +180,55 @@ set(LIBRARY
         Library/Try.h
         Library/ByteReader.cpp
         Library/ByteReader.h
-        )
+        Elements/PkgLength.cpp
+        Elements/PkgLength.h
+        Parsers/SimpleName.cpp
+        Parsers/SuperName.cpp
+        Parsers/DebugObj.cpp
+        Parsers/ReferenceTypeOpcode.cpp
+        Parsers/ObjReference.cpp
+        Parsers/BCDValue.cpp
+        Parsers/Data.cpp
+        Parsers/MutexObject.cpp
+        Parsers/Timeout.cpp
+        Parsers/BufData.cpp
+        Parsers/BufferSize.cpp
+        Parsers/ByteList.cpp
+        Parsers/Dividend.cpp
+        Parsers/Divisor.cpp
+        Parsers/Remainder.cpp
+        Parsers/Quotient.cpp
+        Parsers/MsecTime.cpp
+        Parsers/EventObject.cpp
+        Parsers/ShiftCount.cpp
+        Parsers/SearchPkg.cpp
+        Parsers/MatchOpcode.cpp
+        Parsers/StartIndex.cpp
+        Parsers/MidObj.cpp
+        Parsers/Predicate.cpp
+        Parsers/FatalType.cpp
+        Parsers/FatalCode.cpp
+        Parsers/FatalArg.cpp
+        Parsers/IndexValue.cpp
+        Parsers/BuffPkgStrObj.cpp
+        Parsers/NumElements.cpp
+        Parsers/PackageElementList.cpp
+        Parsers/PackageElement.cpp
+        Parsers/DataRefObject.cpp
+        Parsers/ObjectReference.cpp
+        Parsers/Integer.cpp
+        Parsers/VarNumElements.cpp
+        Parsers/LengthArg.cpp
+        Parsers/NotifyObject.cpp
+        Parsers/NotifyValue.cpp
+        Parsers/UsecTime.cpp
+        Parsers/DefMethod.cpp Parsers/ArgObject.cpp Parsers/TermArg.cpp Parsers/DefDevice.cpp)
 
-add_executable(LibAML ${LIBRARY} ${ELEMENTS}
+add_executable(LibAML ${LIBRARY} ${ELEMENTS} ${PARSERS_GENERATED}
         main.cpp
         DefinitionBlockHeader.h
-        Parser.cpp
-        Parser.h
+        Parsers/Parser.cpp
+        Parsers/Parser.h
         Opcodes.h
         Opcodes.cpp
         Debug.cpp
