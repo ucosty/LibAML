@@ -260,11 +260,14 @@ Result<Element *> Parser::parse_computational_data() {
         case Opcode::String:
             return parse_string();
         case Opcode::ZeroOp:
-            return new Data((uint8_t) 0);
+            read_next_opcode();
+            return new Data(Opcode::ZeroOp, (uint8_t) 0);
         case Opcode::OneOp:
-            return new Data((uint8_t) 1);
+            read_next_opcode();
+            return new Data(Opcode::OneOp, (uint8_t) 1);
         case Opcode::OnesOp:
-            return new Data((uint8_t) 0xff);
+            read_next_opcode();
+            return new Data(Opcode::OnesOp, (uint8_t) 0xff);
         case Opcode::RevisionOp:
             return parse_revision_op();
         case Opcode::DefBuffer:
