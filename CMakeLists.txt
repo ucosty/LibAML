@@ -180,49 +180,7 @@ set(LIBRARY
         Library/Try.h
         Library/ByteReader.cpp
         Library/ByteReader.h
-        Elements/PkgLength.cpp
-        Elements/PkgLength.h
-        Parsers/SimpleName.cpp
-        Parsers/SuperName.cpp
-        Parsers/DebugObj.cpp
-        Parsers/ReferenceTypeOpcode.cpp
-        Parsers/ObjReference.cpp
-        Parsers/BCDValue.cpp
-        Parsers/Data.cpp
-        Parsers/MutexObject.cpp
-        Parsers/Timeout.cpp
-        Parsers/BufData.cpp
-        Parsers/BufferSize.cpp
-        Parsers/ByteList.cpp
-        Parsers/Dividend.cpp
-        Parsers/Divisor.cpp
-        Parsers/Remainder.cpp
-        Parsers/Quotient.cpp
-        Parsers/MsecTime.cpp
-        Parsers/EventObject.cpp
-        Parsers/ShiftCount.cpp
-        Parsers/SearchPkg.cpp
-        Parsers/MatchOpcode.cpp
-        Parsers/StartIndex.cpp
-        Parsers/MidObj.cpp
-        Parsers/Predicate.cpp
-        Parsers/FatalType.cpp
-        Parsers/FatalCode.cpp
-        Parsers/FatalArg.cpp
-        Parsers/IndexValue.cpp
-        Parsers/BuffPkgStrObj.cpp
-        Parsers/NumElements.cpp
-        Parsers/PackageElementList.cpp
-        Parsers/PackageElement.cpp
-        Parsers/DataRefObject.cpp
-        Parsers/ObjectReference.cpp
-        Parsers/Integer.cpp
-        Parsers/VarNumElements.cpp
-        Parsers/LengthArg.cpp
-        Parsers/NotifyObject.cpp
-        Parsers/NotifyValue.cpp
-        Parsers/UsecTime.cpp
-        Parsers/DefMethod.cpp Parsers/ArgObject.cpp Parsers/TermArg.cpp Parsers/DefDevice.cpp)
+        )
 
 add_executable(LibAML ${LIBRARY} ${ELEMENTS} ${PARSERS_GENERATED}
         main.cpp
