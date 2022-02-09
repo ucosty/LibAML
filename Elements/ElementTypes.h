@@ -15,6 +15,7 @@ enum class ElementType {
     Data,
     Method,
     TermArg,
+    ArgObject,
     Acquire
 };
 

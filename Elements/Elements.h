@@ -14,6 +14,7 @@
 #include "DefMethod.h"
 #include "Return.h"
 #include "TermArg.h"
+#include "ArgObject.h"
 
 // Generated
 #include "Acquire.h"
